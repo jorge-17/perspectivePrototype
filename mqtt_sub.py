@@ -2,17 +2,21 @@ import paho.mqtt.client as mqtt
 import mysql.connector
 
 def connectDB():
-   mydb = mysql.connector.connect(host="127.0.0.1", port="4417",user="root",password="abcd24",database="myschemaproto")
+   mydb = mysql.connector.connect(host="localhost", port="3306",user="root",password="abcd24",database="bdtest")
    return mydb
 
 def insertTable(data):
-   mycursor = conn.cursor()
-
-   sql = "INSERT INTO tabla_promedio (id_tabla_promedio, prom) VALUES (%s, %s)"
-   val = (0, data)
-   mycursor.execute(sql, val)
-   print(mycursor.values)
-   conn.commit()
+   try:
+      if conn.is_connected():
+         sql = 'INSERT INTO ejemplos (prom) VALUES ("{}")'.format(data.decode("utf-8"))
+         mycursor.execute(sql)
+         conn.commit()
+   except mysql.connector.Error as error:
+      print("Failed to insert record into tabla_proto table {}".format(error))
+   finally:
+      if (conn.is_connected()):
+         #conn.close()
+         print("MySQL connection is closed")
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -24,7 +28,7 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-   print(msg.topic+" "+str(msg.payload))
+   #print(msg.topic+" "+str(msg.payload))
    insertTable(msg.payload)
    
 
@@ -34,12 +38,7 @@ client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 conn = connectDB()
+mycursor = conn.cursor()
 client.connect("localhost", 1883, 60)
 
-
-
-# Blocking call that processes network traffic, dispatches callbacks and
-# handles reconnecting.
-# Other loop*() functions are available that give a threaded interface and a
-# manual interface.
 client.loop_forever()

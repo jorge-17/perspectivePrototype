@@ -1,38 +1,40 @@
 import tensorflow as tf
 import posenet
+import cv2
 
 
 def getPoints(cap):
-    with tf.Session() as sess:
-        model_cfg, model_outputs = posenet.load_model(101, sess)
-        output_stride = model_cfg['output_stride']
-        input_image, display_image, output_scale = posenet.read_cap(
-            cap, scale_factor=0.7125, output_stride=output_stride)
+    ret, frame1 = cap.read()
+    ret, frame2 = cap.read()
+    diff = cv2.absdiff(frame1, frame2)
 
+    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5,5), 0)
+    _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
+    dilated = cv2.dilate(thresh, None, iterations=3)
+    image, contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)    
+    orig = image.copy()
 
-        heatmaps_result, offsets_result, displacement_fwd_result, displacement_bwd_result = sess.run(
-            model_outputs,
-            feed_dict={'image:0': input_image}
-        )
+    for contour in contours:        
+        x, y, w, h = cv2.boundingRect(contour)
+        
+        if cv2.contourArea(contour) < 1000:
+            continue
 
-        pose_scores, keypoint_scores, keypoint_coords = posenet.decode_multi.decode_multiple_poses(
-            heatmaps_result.squeeze(axis=0),
-            offsets_result.squeeze(axis=0),
-            displacement_fwd_result.squeeze(axis=0),
-            displacement_bwd_result.squeeze(axis=0),
-            output_stride=output_stride,
-            max_pose_detections=10,
-            min_pose_score=0.15)
+        #subframe = cv2.resize(frame2[y:y+h,x:x+w], (224,224), interpolation = cv2.INTER_AREA)
+        #os.chdir(r'C:\Users\jrodarte\posenetPory\pedestrian\imgBank')
+        #cv2.imwrite('img'+str(time())+'.jpg',subframe)
 
-        # Tobillo derecho
-        td_y = keypoint_coords[0][16][0]
-        td_x = keypoint_coords[0][16][1]
-        tobillo_d = (td_x, td_y)  # Punto f (Tobillo)
-        # Tobillo izquierdo
-        ti_y = keypoint_coords[0][15][0]
-        ti_x = keypoint_coords[0][15][1]
-        tobillo_i = (ti_x, ti_y)  # Punto f (Tobillo)
+        color1 = (0, 255, 0)
+        if w/h > 0.7:
+            color1 = (0, 0, 255)
+            continue
+        else:
+            return x, y, w, h
+        
 
-        ptTobillos_y = (ti_y + td_y) / 2
-        ptTobillos_x = (ti_x + td_x) / 2
-        return (ptTobillos_x, ptTobillos_y)
+        #print(w, h)
+        
+    frame1 = frame2
+    ret, frame2 = cap.read()
+    #return (ptTobillos_x, ptTobillos_y)

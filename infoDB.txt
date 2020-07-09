@@ -1,0 +1,6 @@
+CREATE TABLE `ejemplos` (
+  `id_ejemplo` int(11) NOT NULL AUTO_INCREMENT,
+  `prom` varchar(255) NOT NULL,
+  `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_ejemplo`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1

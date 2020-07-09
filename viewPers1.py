@@ -71,7 +71,7 @@ while True:
         tiempo_ult_frame=time.time()
     publish.publishData(frameImageProm)
 
-    cv2.imshow("Frame", frame1)
+    #cv2.imshow("Frame", frame1)
     #cv2.imshow("Perspective transformation", result)
     #cv2.imshow("Vista pajaro", acum_image)
     cv2.imshow("Black window", color_image_video)    
