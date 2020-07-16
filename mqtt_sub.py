@@ -1,18 +1,26 @@
 import paho.mqtt.client as mqtt
 import mysql.connector
+import struct
 
 def connectDB():
-   mydb = mysql.connector.connect(host="localhost", port="3306",user="root",password="abcd24",database="bdtest")
+   mydb = mysql.connector.connect(host="localhost", port="3306",user="root",password="abcd24",database="dist_social")
    return mydb
 
 def insertTable(data):
-   try:
+   try:      
       if conn.is_connected():
-         sql = 'INSERT INTO ejemplos (prom) VALUES ("{}")'.format(data.decode("utf-8"))
+         status_registro = 1
+         camara_id = 1
+         tipo_id = 1
+         nombre = 'prom'
+         valor = float(data)
+         print(valor)  
+         sql = 'INSERT INTO registros (status, camara_id, valor, tipo_id, nombre) VALUES ({}, {}, {}, {}, "{}")'.format(status_registro, camara_id, valor, tipo_id, nombre)
+         print(sql)
          mycursor.execute(sql)
          conn.commit()
    except mysql.connector.Error as error:
-      print("Failed to insert record into tabla_proto table {}".format(error))
+      print("Failed to insert record into registros table {}".format(error))
    finally:
       if (conn.is_connected()):
          #conn.close()

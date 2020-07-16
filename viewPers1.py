@@ -64,11 +64,13 @@ while True:
     acum_image = cv2.add(acum_image, th1*3)
     color_image_video = cv2.applyColorMap(acum_image, cv2.COLORMAP_HOT)
     frameImageProm = color_image_video.mean()*10    
+    
     cv2.putText(color_image_video, "Prom: {}".format(frameImageProm), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
     if time.time()-tiempo_ult_frame > 1:
         acum_image = acum_image.clip(min=1)
         acum_image = acum_image - 1
         tiempo_ult_frame=time.time()
+    #print(type(frameImageProm))
     publish.publishData(frameImageProm)
 
     #cv2.imshow("Frame", frame1)
