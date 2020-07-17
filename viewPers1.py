@@ -70,7 +70,6 @@ while True:
         acum_image = acum_image.clip(min=1)
         acum_image = acum_image - 1
         tiempo_ult_frame=time.time()
-    #print(type(frameImageProm))
     publish.publishData(frameImageProm)
 
     #cv2.imshow("Frame", frame1)

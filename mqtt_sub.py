@@ -1,9 +1,16 @@
 import paho.mqtt.client as mqtt
 import mysql.connector
 import struct
+import configparser
 
 def connectDB():
-   mydb = mysql.connector.connect(host="localhost", port="3306",user="root",password="abcd24",database="dist_social")
+   server_name = cp['database']['server_name']   
+   port = cp['database']['port']
+   user = cp['database']['user']
+   password = cp['database']['pass']
+   db_name = cp['database']['database_name']
+   #mydb = mysql.connector.connect(host="localhost", port="3306",user="root",password="abcd24",database="dist_social")
+   mydb = mysql.connector.connect(host=server_name, port=port,user=user,password=password,database=db_name)
    return mydb
 
 def insertTable(data):
@@ -14,9 +21,7 @@ def insertTable(data):
          tipo_id = 1
          nombre = 'prom'
          valor = float(data)
-         print(valor)  
-         sql = 'INSERT INTO registros (status, camara_id, valor, tipo_id, nombre) VALUES ({}, {}, {}, {}, "{}")'.format(status_registro, camara_id, valor, tipo_id, nombre)
-         print(sql)
+         sql = 'INSERT INTO registros (status, camara_id, valor, tipo_id, nombre) VALUES ({}, {}, {}, {}, "{}")'.format(status_registro, camara_id, valor, tipo_id, nombre)         
          mycursor.execute(sql)
          conn.commit()
    except mysql.connector.Error as error:
@@ -40,13 +45,20 @@ def on_message(client, userdata, msg):
    insertTable(msg.payload)
    
 
-
+cp = configparser.ConfigParser()
+cp.read('config.ini')
+#MQTT Server
+server_name_mqtt = cp['MQTT']['server_name']
+port_mqtt = cp['MQTT']['port']
+keepalive = cp['MQTT']['keepalive']
 
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 conn = connectDB()
 mycursor = conn.cursor()
-client.connect("localhost", 1883, 60)
+port_mqtt = int(port_mqtt)
+keepalive = int(keepalive)
+client.connect(server_name_mqtt, port_mqtt, keepalive)
 
 client.loop_forever()
