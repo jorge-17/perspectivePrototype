@@ -50,6 +50,38 @@ while askUpdateMQTT == 's' or askUpdateMQTT == 'n':
         print("No se actualizará la conexión al servidor MQTT, permanecera el anterior...")
         askUpdateMQTT = ''
 
+
+#Data Dispositivos
+noDis = input("Ingresa el número de dispositivos: ")
+if noDis != '':
+    noDis = int(noDis)
+    contDis = 1
+    while noDis > 0:
+        id_dispositivo = input("Ingresa el ID del dispositivo {}: ".format(contDis))
+        strIdDis = "id_dispositivo{}".format(contDis)
+        frecuencia_dis = input("Ingresa la frecuencia de transmisión del dispositivo {}: ".format(contDis))
+        strFreDis = "frecuencia_dis{}".format(contDis)
+        config['dispositivos'][strIdDis] = id_dispositivo
+        config['dispositivos'][strFreDis] = frecuencia_dis
+        contDis += 1
+        noDis -= 1
+else:
+    print("No ingresaste No. de dispositivos, permanecera el anterior...")
+
+#Data analisis
+askUpdateAnalisis = input("Actualizar parametros de analisis de imagen (s/n): ")
+while askUpdateAnalisis == 's' or askUpdateAnalisis == 'n':
+    if askUpdateAnalisis == 's':
+        for key in config['analisis']:
+            value = config['analisis'][key]
+            valueInput = input("Ingresa el valor de {}: ({}) ".format(key, value))            
+            data = value if valueInput == '' else valueInput
+            config['analisis'][key] = data
+        askUpdateAnalisis = ''
+    else:
+        print("No se actualizarán los paramatros para el analisis de imagen, permanecera el anterior...")
+        askUpdateAnalisis = ''
+
 askSave = ''
 while askSave != 's' and askSave != 'n':
     valCambios = input("¿Confirmas los cambios? (s/n): ")
